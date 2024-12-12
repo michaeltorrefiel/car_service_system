@@ -181,6 +181,48 @@ def edit_customer_records(customer_id):
     else:
         return make_response(jsonify({"message": "record not found"}), 404)
 
+@app.route("/mechanics/<int:mechanic_id>", methods = ["PUT"])
+def edit_mechanic_records(mechanic_id):
+    cur = mysql.connection.cursor()
+
+    info = request.get_json()
+    first_name = info.get("first_name")
+    last_name = info.get("last_name")
+    contact_number = info.get("contact_number")
+    other_mechanic_details = info.get("other_mechanic_details")
+
+    update_fields = []
+    update_values = []
+
+    if first_name:
+        update_fields.append("first_name = %s")
+        update_values.append(first_name)
+    if last_name:
+        update_fields.append("last_name = %s")
+        update_values.append(last_name)
+    if contact_number:
+        update_fields.append("contact_number = %s")
+        update_values.append(contact_number)
+    if other_mechanic_details:
+        update_fields.append("other_mechanic_details = %s")
+        update_values.append(other_mechanic_details)
+
+    update_values.append(mechanic_id)
+
+    if not update_fields:
+        return make_response(jsonify({"message": "no fields provided"}), 400)
+
+    cur.execute(f"update mechanics set {', '.join(update_fields)} where mechanic_id = %s", tuple(update_values))
+
+    mysql.connection.commit()
+    rows_affected = cur.rowcount
+    cur.close()
+
+    if rows_affected > 0:
+        return make_response(jsonify({"message": "record updated successfully", "rows_affected": rows_affected}), 200)
+    else:
+        return make_response(jsonify({"message": "record not found"}), 404)
+
 @app.route("/customers/<int:customer_id>", methods = ["DELETE"])
 def delete_customer_records(customer_id):
     cur = mysql.connection.cursor()
