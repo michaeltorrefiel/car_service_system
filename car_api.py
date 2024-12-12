@@ -83,5 +83,24 @@ def add_car_records():
 
     return make_response(jsonify({"message": "car added successfully", "rows_affected": rows_affected}), 201)
 
+@app.route("/bookings", methods=["POST"])
+def add_booking_records():
+    cur = mysql.connection.cursor()
+
+    info = request.get_json()
+    mechanic_id = info["mechanic_id"]
+    customer_id = info["customer_id"]
+    plate_number = info["plate_number"]
+    date_time_of_service = info["date_time_of_service"]
+    payment = info["payment"]
+
+    cur.execute("insert into bookings(mechanic_id, customer_id, plate_number, date_time_of_service, payment) value (%s, %s, %s, %s, %s)", (mechanic_id, customer_id, plate_number, date_time_of_service, payment))
+
+    mysql.connection.commit()
+    rows_affected = cur.rowcount
+    cur.close()
+
+    return make_response(jsonify({"message": "booking added successfully", "rows_affected": rows_affected}), 201)
+
 if __name__ == "__main__":
     app.run(debug=True)
