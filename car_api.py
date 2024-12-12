@@ -14,20 +14,12 @@ mysql = MySQL(app)
 
 @app.route("/get/customers", methods=["GET"])
 def get_customer_records():
-    try:
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM customers")
         rows = cur.fetchall()
-
-        column_names = ["customer_id", "first_name", "last_name", "contact_number"]
-        result = []
-        for row in rows:
-            result.append(dict(zip(column_names, row)))
-        return jsonify({"success": True, "data": result, "total": len(result)}), 200
-    except:
-        return jsonify({"success": False, "error": "Bad Request"}), 400
-    finally:
         cur.close()
+        
+        return make_response(jsonify(rows), 200)
         
 @app.route("/get/mechanics", methods=["GET"])
 def get_mechanics_records():
