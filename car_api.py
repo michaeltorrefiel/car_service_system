@@ -18,13 +18,22 @@ def get_customer_records():
         cur.execute("SELECT * FROM customers")
         rows = cur.fetchall()
         cur.close()
-        
+
         return make_response(jsonify(rows), 200)
         
 @app.route("/get/mechanics", methods=["GET"])
-def get_mechanics_records():
+def get_mechanic_records():
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM mechanics")
+    rows = cur.fetchall()
+    cur.close()
+    
+    return make_response(jsonify(rows), 200)
+
+@app.route("/get/cars", methods=["GET"])
+def get_car_records():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM cars")
     rows = cur.fetchall()
     cur.close()
     
