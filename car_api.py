@@ -39,6 +39,24 @@ def get_records(table):
     
     return make_response(jsonify(rows), 200)
 
+@app.route("/<table>/<int:id>", methods=["GET"])
+def get_records_by_id(table, id):
+    db_tables = ["customers", "mechanics", "bookings"]
+    if table not in db_tables:
+        return make_response(jsonify({"error": "Table not found"}), 404)
+
+    if table == "customers":
+        id_type = "customer_id"
+    elif table == "mechanics":
+        id_type = "mechanic_id"
+    else:
+        id_type = "booking_id"
+    rows = query_exec(f"select * from {table} where {id_type}= {id}")
+    if not rows:
+        return make_response(jsonify({"error": "No records found"}), 404)
+    
+    return make_response(jsonify(rows), 200)
+
 @app.route("/customers", methods=["POST"])
 def add_customer_records():
     cur = mysql.connection.cursor()
