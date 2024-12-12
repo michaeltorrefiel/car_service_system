@@ -55,7 +55,7 @@ def add_mechanic_records():
     first_name = info["first_name"]
     last_name = info["last_name"]
     contact_number = info["contact_number"]
-    other_mechanic_details = info["other_mechanic_details"]
+    other_mechanic_details = info.get("other_mechanic_details", "")
     cur.execute("insert into mechanics(first_name, last_name, contact_number, other_mechanic_details) value (%s, %s, %s, %s)", (first_name, last_name, contact_number, other_mechanic_details))
 
     mysql.connection.commit()
@@ -63,6 +63,25 @@ def add_mechanic_records():
     cur.close()
 
     return make_response(jsonify({"message": "mechanic added successfully", "rows_affected": rows_affected}), 201)
+
+@app.route("/cars", methods=["POST"])
+def add_car_records():
+    cur = mysql.connection.cursor()
+
+    info = request.get_json()
+    plate_number = info["plate_number"]
+    customer_id = info["customer_id"]
+    manufacturer = info["manufacturer"]
+    model = info["model"]
+    known_issue = info.get("known_issue", "")
+    other_details = info.get("other_details", "")
+    cur.execute("insert into cars(plate_number, customer_id, manufacturer, model, known_issue, other_details) value (%s, %s, %s, %s, %s, %s)", (plate_number, customer_id, manufacturer, model, known_issue, other_details))
+
+    mysql.connection.commit()
+    rows_affected = cur.rowcount
+    cur.close()
+
+    return make_response(jsonify({"message": "car added successfully", "rows_affected": rows_affected}), 201)
 
 if __name__ == "__main__":
     app.run(debug=True)
