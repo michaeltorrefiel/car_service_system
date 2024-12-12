@@ -121,7 +121,7 @@ def add_car_records():
     rows_affected = cur.rowcount
     cur.close()
 
-    return make_response(jsonify({"message": "car added successfully", "rows_affected": rows_affected}), 201)
+    return make_response(jsonify({"message": "car added successfully", "rows_affected": rows_affected, "plate_number": plate_number}), 201)
 
 @app.route("/bookings", methods=["POST"])
 def add_booking_records():
