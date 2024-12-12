@@ -32,7 +32,7 @@ def get_records(table):
     return make_response(jsonify(rows), 200)
 
 @app.route("/customers", methods=["POST"])
-def add_records():
+def add_customer_records():
     cur = mysql.connection.cursor()
 
     info = request.get_json()
@@ -47,6 +47,22 @@ def add_records():
 
     return make_response(jsonify({"message": "customer added successfully", "rows_affected": rows_affected}), 201)
 
+@app.route("/mechanics", methods=["POST"])
+def add_mechanic_records():
+    cur = mysql.connection.cursor()
+
+    info = request.get_json()
+    first_name = info["first_name"]
+    last_name = info["last_name"]
+    contact_number = info["contact_number"]
+    other_mechanic_details = info["other_mechanic_details"]
+    cur.execute("insert into mechanics(first_name, last_name, contact_number, other_mechanic_details) value (%s, %s, %s, %s)", (first_name, last_name, contact_number, other_mechanic_details))
+
+    mysql.connection.commit()
+    rows_affected = cur.rowcount
+    cur.close()
+
+    return make_response(jsonify({"message": "mechanic added successfully", "rows_affected": rows_affected}), 201)
 
 if __name__ == "__main__":
     app.run(debug=True)
