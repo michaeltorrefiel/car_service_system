@@ -60,7 +60,7 @@ def get_records_by_id(table, id):
 @app.route("/cars/<plate_number>", methods=["GET"])
 def get_car_records_by_id(plate_number):
     cur = mysql.connection.cursor()
-    
+
     cur.execute("select * from cars where plate_number = %s", (plate_number,))
     rows = cur.fetchall()
     cur.close()
@@ -81,9 +81,10 @@ def add_customer_records():
 
     mysql.connection.commit()
     rows_affected = cur.rowcount
+    customer_id = cur.lastrowid
     cur.close()
 
-    return make_response(jsonify({"message": "customer added successfully", "rows_affected": rows_affected}), 201)
+    return make_response(jsonify({"message": "customer added successfully", "rows_affected": rows_affected, "customer_id": customer_id}), 201)
 
 @app.route("/mechanics", methods=["POST"])
 def add_mechanic_records():
@@ -98,9 +99,10 @@ def add_mechanic_records():
 
     mysql.connection.commit()
     rows_affected = cur.rowcount
+    mechanic_id = cur.lastrowid
     cur.close()
 
-    return make_response(jsonify({"message": "mechanic added successfully", "rows_affected": rows_affected}), 201)
+    return make_response(jsonify({"message": "mechanic added successfully", "rows_affected": rows_affected, "mechanic_id": mechanic_id}), 201)
 
 @app.route("/cars", methods=["POST"])
 def add_car_records():
@@ -136,9 +138,10 @@ def add_booking_records():
 
     mysql.connection.commit()
     rows_affected = cur.rowcount
+    booking_id = cur.lastrowid
     cur.close()
 
-    return make_response(jsonify({"message": "booking added successfully", "rows_affected": rows_affected}), 201)
+    return make_response(jsonify({"message": "booking added successfully", "rows_affected": rows_affected, "booking_id": booking_id}), 201)
 
 @app.route("/customers/<int:customer_id>", methods = ["DELETE"])
 def delete_customer_records(customer_id):
