@@ -102,5 +102,15 @@ def add_booking_records():
 
     return make_response(jsonify({"message": "booking added successfully", "rows_affected": rows_affected}), 201)
 
+
+@app.route("/bookings/<int:booking_id>", methods = ["DELETE"])
+def delete_customer_records(booking_id):
+    cur = mysql.connection.cursor()
+    cur.execute("delete from bookings where booking_id = %s", (booking_id,))
+    mysql.connection.commit()
+    rows_affected = cur.rowcount
+    cur.close()
+    return make_response(jsonify({"message": "record deleted successfully", "rows_affected": rows_affected}), 200)
+
 if __name__ == "__main__":
     app.run(debug=True)
