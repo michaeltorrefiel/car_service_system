@@ -12,40 +12,35 @@ app.config['MYSQL_CURSORCLASS'] = "DictCursor"
 
 mysql = MySQL(app)
 
+def query_exec(query):
+    cur = mysql.connection.cursor()
+    cur.execute(query)
+    rows = cur.fetchall()
+    cur.close()
+    return(rows)
+
 @app.route("/api/get/customers", methods=["GET"])
 def get_customer_records():
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM customers")
-        rows = cur.fetchall()
-        cur.close()
+    rows = query_exec("select * from customers")
 
-        return make_response(jsonify(rows), 200)
+    return make_response(jsonify(rows), 200)
         
 @app.route("/api/get/mechanics", methods=["GET"])
 def get_mechanic_records():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM mechanics")
-    rows = cur.fetchall()
-    cur.close()
-    
+    rows = query_exec("select * from mechanics")
+
     return make_response(jsonify(rows), 200)
 
 @app.route("/api/get/cars", methods=["GET"])
 def get_car_records():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM cars")
-    rows = cur.fetchall()
-    cur.close()
-    
+    rows = query_exec("select * from cars")
+
     return make_response(jsonify(rows), 200)
 
 @app.route("/api/get/bookings", methods=["GET"])
 def get_booking_records():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM bookings")
-    rows = cur.fetchall()
-    cur.close()
-    
+    rows = query_exec("select * from bookings")
+
     return make_response(jsonify(rows), 200)
 
 if __name__ == "__main__":
