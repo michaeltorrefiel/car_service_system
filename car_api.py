@@ -123,6 +123,52 @@ def add_car_records():
 
     return make_response(jsonify({"message": "car added successfully", "rows_affected": rows_affected, "plate_number": plate_number}), 201)
 
+@app.route("/cars/<plate_number>", methods=["PUT"])
+def edit_cars_records(plate_number):
+    cur = mysql.connection.cursor()
+
+    info = request.get_json()
+    customer_id = info.get("customer_id")
+    manufacturer = info.get("manufacturer")
+    model = info.get("model")
+    known_issue = info.get("known_issue")
+    other_details = info.get("other_details")
+
+    update_fields = []
+    update_values = []
+
+    if customer_id:
+        update_fields.append("customer_id = %s")
+        update_values.append(customer_id)
+    if manufacturer:
+        update_fields.append("manufacturer = %s")
+        update_values.append(manufacturer)
+    if model:
+        update_fields.append("model = %s")
+        update_values.append(model)
+    if known_issue:
+        update_fields.append("known_issue = %s")
+        update_values.append(known_issue)
+    if other_details:
+        update_fields.append("other_details = %s")
+        update_values.append(other_details)
+
+    update_values.append(plate_number)
+
+    if not update_fields:
+        return make_response(jsonify({"message": "no fields provided"}), 400)
+
+    cur.execute(f"update cars set {', '.join(update_fields)} where plate_number = %s", tuple(update_values))
+
+    mysql.connection.commit()
+    rows_affected = cur.rowcount
+    cur.close()
+
+    if rows_affected > 0:
+        return make_response(jsonify({"message": "record updated successfully", "rows_affected": rows_affected}), 200)
+    else:
+        return make_response(jsonify({"message": "record not found"}), 404)
+
 @app.route("/bookings", methods=["POST"])
 def add_booking_records():
     cur = mysql.connection.cursor()
