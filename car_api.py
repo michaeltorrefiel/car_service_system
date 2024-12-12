@@ -123,52 +123,6 @@ def add_car_records():
 
     return make_response(jsonify({"message": "car added successfully", "rows_affected": rows_affected, "plate_number": plate_number}), 201)
 
-@app.route("/cars/<plate_number>", methods=["PUT"])
-def edit_cars_records(plate_number):
-    cur = mysql.connection.cursor()
-
-    info = request.get_json()
-    customer_id = info.get("customer_id")
-    manufacturer = info.get("manufacturer")
-    model = info.get("model")
-    known_issue = info.get("known_issue")
-    other_details = info.get("other_details")
-
-    update_fields = []
-    update_values = []
-
-    if customer_id:
-        update_fields.append("customer_id = %s")
-        update_values.append(customer_id)
-    if manufacturer:
-        update_fields.append("manufacturer = %s")
-        update_values.append(manufacturer)
-    if model:
-        update_fields.append("model = %s")
-        update_values.append(model)
-    if known_issue:
-        update_fields.append("known_issue = %s")
-        update_values.append(known_issue)
-    if other_details:
-        update_fields.append("other_details = %s")
-        update_values.append(other_details)
-
-    update_values.append(plate_number)
-
-    if not update_fields:
-        return make_response(jsonify({"message": "no fields provided"}), 400)
-
-    cur.execute(f"update cars set {', '.join(update_fields)} where plate_number = %s", tuple(update_values))
-
-    mysql.connection.commit()
-    rows_affected = cur.rowcount
-    cur.close()
-
-    if rows_affected > 0:
-        return make_response(jsonify({"message": "record updated successfully", "rows_affected": rows_affected}), 200)
-    else:
-        return make_response(jsonify({"message": "record not found"}), 404)
-
 @app.route("/bookings", methods=["POST"])
 def add_booking_records():
     cur = mysql.connection.cursor()
@@ -269,6 +223,98 @@ def edit_mechanic_records(mechanic_id):
     else:
         return make_response(jsonify({"message": "record not found"}), 404)
 
+@app.route("/cars/<plate_number>", methods=["PUT"])
+def edit_cars_records(plate_number):
+    cur = mysql.connection.cursor()
+
+    info = request.get_json()
+    customer_id = info.get("customer_id")
+    manufacturer = info.get("manufacturer")
+    model = info.get("model")
+    known_issue = info.get("known_issue")
+    other_details = info.get("other_details")
+
+    update_fields = []
+    update_values = []
+
+    if customer_id:
+        update_fields.append("customer_id = %s")
+        update_values.append(customer_id)
+    if manufacturer:
+        update_fields.append("manufacturer = %s")
+        update_values.append(manufacturer)
+    if model:
+        update_fields.append("model = %s")
+        update_values.append(model)
+    if known_issue:
+        update_fields.append("known_issue = %s")
+        update_values.append(known_issue)
+    if other_details:
+        update_fields.append("other_details = %s")
+        update_values.append(other_details)
+
+    update_values.append(plate_number)
+
+    if not update_fields:
+        return make_response(jsonify({"message": "no fields provided"}), 400)
+
+    cur.execute(f"update cars set {', '.join(update_fields)} where plate_number = %s", tuple(update_values))
+
+    mysql.connection.commit()
+    rows_affected = cur.rowcount
+    cur.close()
+
+    if rows_affected > 0:
+        return make_response(jsonify({"message": "record updated successfully", "rows_affected": rows_affected}), 200)
+    else:
+        return make_response(jsonify({"message": "record not found"}), 404)
+    
+@app.route("/bookings/<int:booking_id>", methods=["PUT"])
+def edit_booking_records(booking_id):
+    cur = mysql.connection.cursor()
+
+    info = request.get_json()
+    mechanic_id = info.get("mechanic_id")
+    customer_id = info.get("customer_id")
+    plate_number = info.get("plate_number")
+    date_time_of_service = info.get("date_time_of_service")
+    payment = info.get("payment")
+
+    update_fields = []
+    update_values = []
+
+    if mechanic_id:
+        update_fields.append("mechanic_id = %s")
+        update_values.append(mechanic_id)
+    if customer_id:
+        update_fields.append("customer_id = %s")
+        update_values.append(customer_id)
+    if plate_number:
+        update_fields.append("plate_number = %s")
+        update_values.append(plate_number)
+    if date_time_of_service:
+        update_fields.append("date_time_of_service = %s")
+        update_values.append(date_time_of_service)
+    if payment:
+        update_fields.append("payment = %s")
+        update_values.append(payment)
+
+    update_values.append(booking_id)
+
+    if not update_fields:
+        return make_response(jsonify({"message": "no fields provided"}), 400)
+
+    cur.execute(f"update bookings set {', '.join(update_fields)} where booking_id = %s", tuple(update_values))
+
+    mysql.connection.commit()
+    rows_affected = cur.rowcount
+    cur.close()
+
+    if rows_affected > 0:
+        return make_response(jsonify({"message": "record updated successfully", "rows_affected": rows_affected}), 200)
+    else:
+        return make_response(jsonify({"message": "record not found"}), 404)
+    
 @app.route("/customers/<int:customer_id>", methods = ["DELETE"])
 def delete_customer_records(customer_id):
     cur = mysql.connection.cursor()
