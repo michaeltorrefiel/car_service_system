@@ -19,29 +19,15 @@ def query_exec(query):
     cur.close()
     return(rows)
 
-# @app.route("/api/customers", methods=["GET"])
-# def get_customer_records():
-#     rows = query_exec("select * from customers")
-#     return make_response(jsonify(rows), 200)
-        
-# @app.route("/api/mechanics", methods=["GET"])
-# def get_mechanic_records():
-#     rows = query_exec("select * from mechanics")
-#     return make_response(jsonify(rows), 200)
-
-# @app.route("/api/cars", methods=["GET"])
-# def get_car_records():
-#     rows = query_exec("select * from cars")
-#     return make_response(jsonify(rows), 200)
-
-# @app.route("/api/bookings", methods=["GET"])
-# def get_booking_records():
-#     rows = query_exec("select * from bookings")
-#     return make_response(jsonify(rows), 200)
-
 @app.route("/api/<table>", methods=["GET"])
 def get_records(table):
+    db_tables = ["customers", "mechanics", "cars", "bookings"]
+    if table not in db_tables:
+        return make_response(jsonify({"error": "Table not found"}), 404)
+
     rows = query_exec(f"select * from {table}")
+    if not rows:
+        return make_response(jsonify({"error": "No records found"}), 404)
     return make_response(jsonify(rows), 200)
 
 if __name__ == "__main__":
