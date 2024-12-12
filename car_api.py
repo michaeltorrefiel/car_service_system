@@ -12,6 +12,14 @@ app.config['MYSQL_CURSORCLASS'] = "DictCursor"
 
 mysql = MySQL(app)
 
+@app.route("/")
+def home_page():
+    home = """
+    <h1>CAR SERVICE SYSTEM</h1>
+    <p>tables = ["customers", "mechanics", "cars", "bookings"] </p>
+    """
+    return home
+
 def query_exec(query):
     cur = mysql.connection.cursor()
     cur.execute(query)
