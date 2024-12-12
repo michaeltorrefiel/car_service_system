@@ -19,25 +19,25 @@ def query_exec(query):
     cur.close()
     return(rows)
 
-@app.route("/api/get/customers", methods=["GET"])
+@app.route("/api/customers", methods=["GET"])
 def get_customer_records():
     rows = query_exec("select * from customers")
 
     return make_response(jsonify(rows), 200)
         
-@app.route("/api/get/mechanics", methods=["GET"])
+@app.route("/api/mechanics", methods=["GET"])
 def get_mechanic_records():
     rows = query_exec("select * from mechanics")
 
     return make_response(jsonify(rows), 200)
 
-@app.route("/api/get/cars", methods=["GET"])
+@app.route("/api/cars", methods=["GET"])
 def get_car_records():
     rows = query_exec("select * from cars")
 
     return make_response(jsonify(rows), 200)
 
-@app.route("/api/get/bookings", methods=["GET"])
+@app.route("/api/bookings", methods=["GET"])
 def get_booking_records():
     rows = query_exec("select * from bookings")
 
