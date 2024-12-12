@@ -12,7 +12,7 @@ app.config['MYSQL_CURSORCLASS'] = "DictCursor"
 
 mysql = MySQL(app)
 
-@app.route("/get/customers", methods=["GET"])
+@app.route("/api/get/customers", methods=["GET"])
 def get_customer_records():
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM customers")
@@ -21,7 +21,7 @@ def get_customer_records():
 
         return make_response(jsonify(rows), 200)
         
-@app.route("/get/mechanics", methods=["GET"])
+@app.route("/api/get/mechanics", methods=["GET"])
 def get_mechanic_records():
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM mechanics")
@@ -30,10 +30,19 @@ def get_mechanic_records():
     
     return make_response(jsonify(rows), 200)
 
-@app.route("/get/cars", methods=["GET"])
+@app.route("/api/get/cars", methods=["GET"])
 def get_car_records():
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM cars")
+    rows = cur.fetchall()
+    cur.close()
+    
+    return make_response(jsonify(rows), 200)
+
+@app.route("/api/get/bookings", methods=["GET"])
+def get_booking_records():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM bookings")
     rows = cur.fetchall()
     cur.close()
     
