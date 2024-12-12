@@ -19,28 +19,29 @@ def query_exec(query):
     cur.close()
     return(rows)
 
-@app.route("/api/customers", methods=["GET"])
-def get_customer_records():
-    rows = query_exec("select * from customers")
-
-    return make_response(jsonify(rows), 200)
+# @app.route("/api/customers", methods=["GET"])
+# def get_customer_records():
+#     rows = query_exec("select * from customers")
+#     return make_response(jsonify(rows), 200)
         
-@app.route("/api/mechanics", methods=["GET"])
-def get_mechanic_records():
-    rows = query_exec("select * from mechanics")
+# @app.route("/api/mechanics", methods=["GET"])
+# def get_mechanic_records():
+#     rows = query_exec("select * from mechanics")
+#     return make_response(jsonify(rows), 200)
 
-    return make_response(jsonify(rows), 200)
+# @app.route("/api/cars", methods=["GET"])
+# def get_car_records():
+#     rows = query_exec("select * from cars")
+#     return make_response(jsonify(rows), 200)
 
-@app.route("/api/cars", methods=["GET"])
-def get_car_records():
-    rows = query_exec("select * from cars")
+# @app.route("/api/bookings", methods=["GET"])
+# def get_booking_records():
+#     rows = query_exec("select * from bookings")
+#     return make_response(jsonify(rows), 200)
 
-    return make_response(jsonify(rows), 200)
-
-@app.route("/api/bookings", methods=["GET"])
-def get_booking_records():
-    rows = query_exec("select * from bookings")
-
+@app.route("/api/<table>", methods=["GET"])
+def get_records(table):
+    rows = query_exec(f"select * from {table}")
     return make_response(jsonify(rows), 200)
 
 if __name__ == "__main__":
