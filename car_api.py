@@ -102,12 +102,23 @@ def add_booking_records():
 
     return make_response(jsonify({"message": "booking added successfully", "rows_affected": rows_affected}), 201)
 
-
-@app.route("/bookings/<int:booking_id>", methods = ["DELETE"])
-def delete_booking_records(booking_id):
+@app.route("/customers/<int:customer_id>", methods = ["DELETE"])
+def delete_customer_records(customer_id):
     cur = mysql.connection.cursor()
 
-    cur.execute("delete from bookings where booking_id = %s", (booking_id,))
+    cur.execute("delete from customers where customer_id = %s", (customer_id,))
+
+    mysql.connection.commit()
+    rows_affected = cur.rowcount
+    cur.close()
+
+    return make_response(jsonify({"message": "record deleted successfully", "rows_affected": rows_affected}), 200)
+
+@app.route("/mechanics/<int:mechanic_id>", methods = ["DELETE"])
+def delete_mechanic_records(mechanic_id):
+    cur = mysql.connection.cursor()
+
+    cur.execute("delete from mechanics where mechanic_id = %s", (mechanic_id,))
 
     mysql.connection.commit()
     rows_affected = cur.rowcount
@@ -127,17 +138,19 @@ def delete_car_records(plate_number):
 
     return make_response(jsonify({"message": "record deleted successfully", "rows_affected": rows_affected}), 200)
 
-@app.route("/customers/<int:customer_id>", methods = ["DELETE"])
-def delete_customer_records(customer_id):
+@app.route("/bookings/<int:booking_id>", methods = ["DELETE"])
+def delete_booking_records(booking_id):
     cur = mysql.connection.cursor()
 
-    cur.execute("delete from customers where customer_id = %s", (customer_id,))
+    cur.execute("delete from bookings where booking_id = %s", (booking_id,))
 
     mysql.connection.commit()
     rows_affected = cur.rowcount
     cur.close()
-    
+
     return make_response(jsonify({"message": "record deleted successfully", "rows_affected": rows_affected}), 200)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
