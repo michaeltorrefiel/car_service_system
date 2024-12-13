@@ -20,9 +20,9 @@ def home_page():
     """
     return home
 
-def query_exec(query):
+def query_exec(query, params):
     cur = mysql.connection.cursor()
-    cur.execute(query)
+    cur.execute(query, params)
     rows = cur.fetchall()
     cur.close()
     return(rows)
@@ -33,7 +33,7 @@ def get_records(table):
     if table not in db_tables:
         return make_response(jsonify({"error": "Table not found"}), 404)
 
-    rows = query_exec(f"select * from {table}")
+    rows = query_exec(f"select * from %s", (table,))
     if not rows:
         return make_response(jsonify({"error": "No records found"}), 404)
     
@@ -54,7 +54,7 @@ def get_records_by_id(table, id):
     else:
         id_type = "booking_id"
 
-    rows = query_exec(f"select * from {table} where {id_type}= {id}")
+    rows = query_exec(f"select * from {table} where {id_type} = %s", (id,))
     if not rows:
         return make_response(jsonify({"error": "No records found"}), 404)
     
