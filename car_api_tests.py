@@ -236,6 +236,56 @@ class CarApiTests(unittest.TestCase):
         self.app.delete(f"/customers/{customer_id}")
         self.app.delete(f"/mechanics/{mechanic_id}")
 
+    def test_put_customer(self):
+        test_customer_dummy = {
+            "first_name": "FNAME_TEST",
+            "last_name": "LNAME_TEST",
+            "contact_number": "09000735700"
+        } 
+        response = self.app.post("/customers", json=test_customer_dummy)
+        self.assertEqual(response.status_code, 201)
+        customer_id = response.get_json()["customer_id"]
+
+        updated_customer_data = {
+            "first_name": "UPDATED_FNAME",
+            "last_name": "UPDATED_LNAME",
+            "contact_number": "09111735811"
+        }
+        response = self.app.put(f"/customers/{customer_id}", json=updated_customer_data)
+        self.assertEqual(response.status_code, 200)
+
+        reponse_data = response.get_json()
+        self.assertEqual(reponse_data["message"], "record updated successfully")
+        self.assertEqual(reponse_data["rows_affected"], 1)
+
+        self.app.delete(f"/customers/{customer_id}")
+
+    def test_put_mechanic(self):
+        test_mechanic_dummy = {
+            "first_name": "FNAME_TEST",
+            "last_name": "LNAME_TEST",
+            "contact_number": "09000735700",
+            "other_mechanic_details": "MECHANIC_DEETS_TEST"
+        } 
+        response = self.app.post("/mechanics", json=test_mechanic_dummy)
+        self.assertEqual(response.status_code, 201)
+        mechanic_id = response.get_json()["mechanic_id"]
+
+        updated_mechanic_data = {
+            "first_name": "UPDATED_FNAME",
+            "last_name": "UPDATED_LNAME",
+            "contact_number": "09111735811",
+            "other_mechanic_details": "UPDATED_MECHANIC_DEETS"
+        }
+        response = self.app.put(f"/mechanics/{mechanic_id}", json=updated_mechanic_data)
+        self.assertEqual(response.status_code, 200)
+
+        reponse_data = response.get_json()
+        self.assertEqual(reponse_data["message"], "record updated successfully")
+        self.assertEqual(reponse_data["rows_affected"], 1)
+
+        self.app.delete(f"/mechanics/{mechanic_id}")
+
     def test_2_delete_record(self):
         # delete test for bookings
         response = self.app.delete(f"/bookings/{self.booking_id}")
