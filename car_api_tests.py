@@ -80,7 +80,7 @@ class CarApiTests(unittest.TestCase):
         self.assertEqual(data[0]["contact_number"], self.test_mechanic_dummy["contact_number"])
         self.assertEqual(data[0]["other_mechanic_details"], self.test_mechanic_dummy["other_mechanic_details"])
 
-    def test_get_car(self):
+    def test_1_get_car(self):
         response = self.app.get(f"/cars/{self.plate_number}")
         self.assertEqual(response.status_code, 200)
 
@@ -91,7 +91,7 @@ class CarApiTests(unittest.TestCase):
         self.assertEqual(data[0]["model"], self.test_car_dummy["model"])
         self.assertEqual(data[0]["known_issue"], self.test_car_dummy["known_issue"])
         self.assertEqual(data[0]["other_details"], self.test_car_dummy["other_details"])
-
+    
     def test_1_get_booking(self):
         response = self.app.get(f"/bookings/{self.booking_id}")
         self.assertEqual(response.status_code, 200)
@@ -109,13 +109,22 @@ class CarApiTests(unittest.TestCase):
 
         self.assertEqual(data[0]["payment"], self.test_booking_dummy["payment"])
 
-    def test_2_delete_booking(self):
+    def test_2_delete_record(self):
+        # delete test for bookings
         response = self.app.delete(f"/bookings/{self.booking_id}")
         self.assertEqual(response.status_code, 200)
         self.assertIn("record deleted successfully", response.get_json()["message"])
 
         get_response = self.app.get(f"/bookings/{self.booking_id}")
         self.assertEqual(get_response.status_code, 404)
+
+        response = self.app.delete(f"/cars/{self.plate_number}")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("record deleted successfully", response.get_json()["message"])
+
+        get_response = self.app.get(f"/cars/{self.plate_number}")
+        self.assertEqual(get_response.status_code, 404)
+
 
     def test_home_page(self):
         response = self.app.get("/")
