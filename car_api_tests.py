@@ -92,7 +92,7 @@ class CarApiTests(unittest.TestCase):
         self.assertEqual(data[0]["known_issue"], self.test_car_dummy["known_issue"])
         self.assertEqual(data[0]["other_details"], self.test_car_dummy["other_details"])
 
-    def test_get_booking(self):
+    def test_1_get_booking(self):
         response = self.app.get(f"/bookings/{self.booking_id}")
         self.assertEqual(response.status_code, 200)
 
@@ -108,6 +108,14 @@ class CarApiTests(unittest.TestCase):
         self.assertEqual(formatted_date, self.test_booking_dummy["date_time_of_service"])
 
         self.assertEqual(data[0]["payment"], self.test_booking_dummy["payment"])
+
+    def test_2_delete_booking(self):
+        response = self.app.delete(f"/bookings/{self.booking_id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("record deleted successfully", response.get_json()["message"])
+
+        get_response = self.app.get(f"/bookings/{self.booking_id}")
+        self.assertEqual(get_response.status_code, 404)
 
     def test_home_page(self):
         response = self.app.get("/")
