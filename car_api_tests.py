@@ -148,6 +148,94 @@ class CarApiTests(unittest.TestCase):
         mechanic_id = response_data["mechanic_id"]
         self.app.delete(f"/mechanics/{mechanic_id}")
 
+    def test_post_car(self):
+        test_customer_dummy = {
+            "first_name": "FNAME_TEST",
+            "last_name": "LNAME_TEST",
+            "contact_number": "09000735700"
+        } 
+        response = self.app.post("/customers", json=test_customer_dummy)
+        self.assertEqual(response.status_code, 201)
+        customer_id = response.get_json()["customer_id"]
+
+        test_car_dummy = {
+            "plate_number": "PLT_TEST1",
+            "customer_id": customer_id,
+            "manufacturer": "MAN_TEST",
+            "model": "MOD_TEST",
+            "known_issue": "KNOWN_ISS_TEST",
+            "other_details": "CAR_DEETS_TEST",
+        }
+        response = self.app.post("/cars", json=test_car_dummy)
+        self.assertEqual(response.status_code, 201)
+
+        response_data = response.get_json()
+        self.assertIn("plate_number", response_data)
+        self.assertEqual(response_data["plate_number"], test_car_dummy["plate_number"])
+
+        plate_number = test_car_dummy["plate_number"]
+        get_response = self.app.get(f"/cars/{plate_number}")
+        self.assertEqual(get_response.status_code, 200)
+        get_response_data = get_response.get_json()
+        self.assertEqual(get_response_data[0]["manufacturer"], test_car_dummy["manufacturer"])
+
+        self.app.delete(f"/cars/{plate_number}")
+        self.app.delete(f"/customers/{customer_id}")
+
+    def test_post_booking(self):
+        test_customer_dummy = {
+            "first_name": "FNAME_TEST",
+            "last_name": "LNAME_TEST",
+            "contact_number": "09000735700"
+        } 
+        response = self.app.post("/customers", json=test_customer_dummy)
+        self.assertEqual(response.status_code, 201)
+        customer_id = response.get_json()["customer_id"]
+
+        test_mechanic_dummy = {
+            "first_name": "FNAME_TEST",
+            "last_name": "LNAME_TEST",
+            "contact_number": "09000735700",
+            "other_mechanic_details": "MECHANIC_DEETS_TEST"
+        } 
+        response = self.app.post("/mechanics", json=test_mechanic_dummy)
+        self.assertEqual(response.status_code, 201)
+        mechanic_id = response.get_json()["mechanic_id"]
+
+        test_car_dummy = {
+            "plate_number": "PLT_TEST2",
+            "customer_id": customer_id,
+            "manufacturer": "MAN_TEST",
+            "model": "MOD_TEST",
+            "known_issue": "KNOWN_ISS_TEST",
+            "other_details": "CAR_DEETS_TEST",
+        }
+        response = self.app.post("/cars", json=test_car_dummy)
+        self.assertEqual(response.status_code, 201)
+        plate_number = response.get_json()["plate_number"]
+
+        test_booking_dummy = {
+            "mechanic_id": mechanic_id,
+            "customer_id": customer_id,
+            "plate_number": plate_number,
+            "date_time_of_service": "2024-12-12 12:12:12",
+            "payment": "2024"
+        }
+        response = self.app.post("/bookings", json=test_booking_dummy)
+        self.assertEqual(response.status_code, 201)
+
+        response_data = response.get_json()        
+        self.assertIn("booking_id", response_data)
+        self.assertIn("message", response_data)
+        self.assertEqual(response_data["message"], "booking added successfully")
+        self.assertEqual(response_data["rows_affected"], 1)
+
+        booking_id = response_data["booking_id"]
+        self.app.delete(f"/bookings/{booking_id}")
+        self.app.delete(f"/cars/{plate_number}")
+        self.app.delete(f"/customers/{customer_id}")
+        self.app.delete(f"/mechanics/{mechanic_id}")
+
     def test_2_delete_record(self):
         # delete test for bookings
         response = self.app.delete(f"/bookings/{self.booking_id}")
