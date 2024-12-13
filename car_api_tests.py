@@ -59,7 +59,7 @@ class CarApiTests(unittest.TestCase):
         self.app.delete(f"/customers/{self.customer_id}")
         self.app.delete(f"/mechanics/{self.mechanic_id}")
 
-    def test_get_customer(self):
+    def test_1_get_customer(self):
         response = self.app.get(f"/customers/{self.customer_id}")
         self.assertEqual(response.status_code, 200)
 
@@ -69,7 +69,7 @@ class CarApiTests(unittest.TestCase):
         self.assertEqual(data[0]["last_name"], self.test_customer_dummy["last_name"])
         self.assertEqual(data[0]["contact_number"], self.test_customer_dummy["contact_number"])
 
-    def test_get_mechanic(self):
+    def test_1_get_mechanic(self):
         response = self.app.get(f"/mechanics/{self.mechanic_id}")
         self.assertEqual(response.status_code, 200)
 
@@ -118,6 +118,7 @@ class CarApiTests(unittest.TestCase):
         get_response = self.app.get(f"/bookings/{self.booking_id}")
         self.assertEqual(get_response.status_code, 404)
 
+        # delete test for cars 
         response = self.app.delete(f"/cars/{self.plate_number}")
         self.assertEqual(response.status_code, 200)
         self.assertIn("record deleted successfully", response.get_json()["message"])
@@ -125,6 +126,21 @@ class CarApiTests(unittest.TestCase):
         get_response = self.app.get(f"/cars/{self.plate_number}")
         self.assertEqual(get_response.status_code, 404)
 
+        # delete test for customers
+        response = self.app.delete(f"/customers/{self.customer_id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("record deleted successfully", response.get_json()["message"])
+
+        get_response = self.app.get(f"/customers/{self.customer_id}")
+        self.assertEqual(get_response.status_code, 404)
+
+        # delete test for mechanics
+        response = self.app.delete(f"/mechanics/{self.mechanic_id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("record deleted successfully", response.get_json()["message"])
+
+        get_response = self.app.get(f"/mechanics/{self.mechanic_id}")
+        self.assertEqual(get_response.status_code, 404)
 
     def test_home_page(self):
         response = self.app.get("/")
