@@ -119,7 +119,7 @@ class CarApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
 
         response_data = response.get_json()
-        print(response_data)
+        # print(response_data)
         self.assertIn("customer_id", response_data)
         self.assertIn("message", response_data)
         self.assertEqual(response_data["message"], "customer added successfully")
@@ -127,6 +127,26 @@ class CarApiTests(unittest.TestCase):
 
         customer_id = response_data["customer_id"]
         self.app.delete(f"/customers/{customer_id}")
+
+    def test_post_mechanic(self):
+        test_mechanic_dummy = {
+            "first_name": "FNAME_TEST",
+            "last_name": "LNAME_TEST",
+            "contact_number": "09000735700",
+            "other_mechanic_details": "MECHANIC_DEETS_TEST"
+        } 
+        response = self.app.post("/mechanics", json=test_mechanic_dummy)
+        self.assertEqual(response.status_code, 201)
+
+        response_data = response.get_json()
+        # print(response_data)
+        self.assertIn("mechanic_id", response_data)
+        self.assertIn("message", response_data)
+        self.assertEqual(response_data["message"], "mechanic added successfully")
+        self.assertEqual(response_data["rows_affected"], 1)
+
+        mechanic_id = response_data["mechanic_id"]
+        self.app.delete(f"/mechanics/{mechanic_id}")
 
     def test_2_delete_record(self):
         # delete test for bookings
