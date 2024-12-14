@@ -138,6 +138,9 @@ def add_records(table):
         if not isinstance(plate_number, str) or not isinstance(customer_id, int) or not isinstance(manufacturer, str) or not isinstance(model, str):
             return make_response(jsonify({"error": "Invalid input type"}), 400)
 
+        if len(plate_number) > 9:
+            return make_response(jsonify({"error": "Invalid plate number"}), 400)
+
         cur.execute("insert into cars(plate_number, customer_id, manufacturer, model, known_issue, other_details) value (%s, %s, %s, %s, %s, %s)", (plate_number, customer_id, manufacturer, model, known_issue, other_details))
         record_name = "car"
         id_type = "plate_number"
@@ -275,6 +278,9 @@ def edit_cars_records(plate_number):
     cur = mysql.connection.cursor()
 
     info = request.get_json()
+    if not info:
+        return make_response(jsonify({"error": "Invalid JSON payload"}), 400)
+
     customer_id = info.get("customer_id")
     manufacturer = info.get("manufacturer")
     model = info.get("model")
@@ -300,10 +306,16 @@ def edit_cars_records(plate_number):
         update_fields.append("other_details = %s")
         update_values.append(other_details)
 
-    update_values.append(plate_number)
-
     if not update_fields:
-        return make_response(jsonify({"message": "no fields provided"}), 400)
+        return make_response(jsonify({"error": "no fields provided"}), 400)
+    
+    if not isinstance(plate_number, str) or not isinstance(customer_id, int) or not isinstance(manufacturer, str) or not isinstance(model, str):
+        return make_response(jsonify({"error": "Invalid input type"}), 400)
+
+    if len(plate_number) > 9:
+        return make_response(jsonify({"error": "Invalid plate number"}), 400)
+
+    update_values.append(plate_number)
 
     cur.execute(f"update cars set {', '.join(update_fields)} where plate_number = %s", tuple(update_values))
 
@@ -314,7 +326,7 @@ def edit_cars_records(plate_number):
     if rows_affected > 0:
         return make_response(jsonify({"message": "record updated successfully", "rows_affected": rows_affected}), 200)
     else:
-        return make_response(jsonify({"message": "record not found"}), 404)
+        return make_response(jsonify({"error": "record not found"}), 404)
 
 @app.route("/<table>/<int:id>", methods=["DELETE"])
 def delete_records_by_id(table, id):

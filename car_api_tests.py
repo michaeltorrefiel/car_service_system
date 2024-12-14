@@ -263,6 +263,18 @@ class CarApiTests(unittest.TestCase):
         response = self.app.post("/cars", json=test_car_dummy_invalid)
         self.assertEqual(response.json["error"], "Invalid input type")
         self.assertEqual(response.status_code, 400)
+
+        test_car_dummy_invalid_plate_number = {
+            "plate_number": "inv_plate_",
+            "customer_id": customer_id,
+            "manufacturer": "MAN_TEST",
+            "model": "MOD_TEST",
+            "known_issue": "KNOWN_ISS_TEST",
+            "other_details": "CAR_DEETS_TEST",
+        }
+        response = self.app.post("/cars", json=test_car_dummy_invalid_plate_number)
+        self.assertEqual(response.json["error"], "Invalid plate number")
+        self.assertEqual(response.status_code, 400)
         
         self.app.delete(f"/customers/{customer_id}")
 
@@ -564,7 +576,7 @@ class CarApiTests(unittest.TestCase):
 
         self.app.delete(f"/mechanics/{mechanic_id}")
 
-    def test_put_car(self):
+    def test_put_car_error(self):
         test_customer_dummy = {
             "first_name": "FNAME_TEST",
             "last_name": "LNAME_TEST",
@@ -576,6 +588,67 @@ class CarApiTests(unittest.TestCase):
 
         test_car_dummy = {
             "plate_number": "PLT_TEST3",
+            "customer_id": customer_id,
+            "manufacturer": "MAN_TEST",
+            "model": "MOD_TEST",
+            "known_issue": "KNOWN_ISS_TEST",
+            "other_details": "CAR_DEETS_TEST",
+        }
+        response = self.app.post("/cars", json=test_car_dummy)
+        self.assertEqual(response.status_code, 201)
+        plate_number = test_car_dummy["plate_number"]
+
+        test_car_dummy_invalid = {
+            "plate_number": "PLT_TEST3",
+            "customer_id": customer_id,
+            "manufacturer": 1,
+            "model": "MOD_TEST",
+            "known_issue": "KNOWN_ISS_TEST",
+            "other_details": "CAR_DEETS_TEST",
+        }
+        response = self.app.put(f"/cars/{plate_number}", json=test_car_dummy_invalid)
+        self.assertEqual(response.json["error"], "Invalid input type")
+        self.assertEqual(response.status_code, 400)
+
+        response = self.app.put(f"/cars/{plate_number}", json={})
+        self.assertEqual(response.json["error"], "Invalid JSON payload")
+        self.assertEqual(response.status_code, 400)
+
+        response = self.app.put(f"/cars/inv_plate_", json=test_car_dummy)
+        self.assertEqual(response.json["error"], "Invalid plate number")
+        self.assertEqual(response.status_code, 400)
+
+        test_car_dummy_no_update_fields = {
+            "plate_number": "",
+            "customer_id": "",
+            "manufacturer": "",
+            "model": "",
+            "known_issue": "",
+            "other_details": "",
+        }
+        response = self.app.put(f"/cars/{plate_number}", json=test_car_dummy_no_update_fields)
+        self.assertEqual(response.json["error"], "no fields provided")
+        self.assertEqual(response.status_code, 400)
+
+        response = self.app.put(f"/cars/ZZZZ99999", json=test_car_dummy)
+        self.assertEqual(response.json["error"], "record not found")
+        self.assertEqual(response.status_code, 404)
+
+        self.app.delete(f"/cars/{plate_number}")
+        self.app.delete(f"/customers/{customer_id}")
+
+    def test_put_car(self):
+        test_customer_dummy = {
+            "first_name": "FNAME_TEST",
+            "last_name": "LNAME_TEST",
+            "contact_number": "09000735700"
+        } 
+        response = self.app.post("/customers", json=test_customer_dummy)
+        self.assertEqual(response.status_code, 201)
+        customer_id = response.get_json()["customer_id"]
+
+        test_car_dummy = {
+            "plate_number": "PLT_TEST4",
             "customer_id": customer_id,
             "manufacturer": "MAN_TEST",
             "model": "MOD_TEST",
@@ -625,7 +698,7 @@ class CarApiTests(unittest.TestCase):
         mechanic_id = response.get_json()["mechanic_id"]
 
         test_car_dummy = {
-            "plate_number": "PLT_TEST4",
+            "plate_number": "PLT_TEST5",
             "customer_id": customer_id,
             "manufacturer": "MAN_TEST",
             "model": "MOD_TEST",
