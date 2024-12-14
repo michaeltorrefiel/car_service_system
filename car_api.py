@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, make_response
 from flask_mysqldb import MySQL
 from datetime import datetime
+import jwt
 
 app = Flask(__name__)
 
@@ -8,10 +9,39 @@ app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'root'
 app.config['MYSQL_DB'] = 'car_service'
-
+app.config['SECRET_KEY'] = 'secret_key'
 app.config['MYSQL_CURSORCLASS'] = "DictCursor"
 
 mysql = MySQL(app)
+
+@app.route("/login", methods=["POST"])
+def login():
+    user = {
+        "username": "michael_torrefiel",
+        "password": "torrefiel321"
+    }
+
+    info = request.get_json()
+    username = info.get("username")
+    password = info.get("password")
+
+    if username == user["username"] and password == user["password"]:
+        token = jwt.encode({"username": username}, app.config["SECRET_KEY"], algorithm="HS256")
+        return make_response(jsonify({"token": token}))
+    return make_response(jsonify({"message": "Invalid username or password"}), 401)
+
+@app.route("/protected", methods=["GET"])
+def protected():
+    token = request.headers.get("Authorization")
+
+    if not token:
+        return make_response(jsonify({"error": "Token missing!"}), 403)
+
+    try:
+        decoded = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
+        return jsonify({"message": f"Welcome, {decoded["username"]}!"})
+    except jwt.InvalidTokenError:
+        return jsonify({"message": "Invalid token!"}), 403
 
 @app.route("/")
 def home_page():
