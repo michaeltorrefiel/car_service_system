@@ -59,8 +59,18 @@ class CarApiTests(unittest.TestCase):
         self.app.delete(f"/customers/{self.customer_id}")
         self.app.delete(f"/mechanics/{self.mechanic_id}")
 
-    def test_if_table_not_found(self):
-        response = self.app.get(f"/motorcyles")
+    def test_get_table_error(self):
+        response = self.app.get("/invalid_table")
+        self.assertEqual(response.json["error"], "Table not found")
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_record_by_id_error(self):
+        response = self.app.get("/invalid_table/1")
+        self.assertEqual(response.json["error"], "Table not found")
+        self.assertEqual(response.status_code, 404)
+
+        response = self.app.get("/customers/99999999")
+        self.assertEqual(response.json["error"], "No records found")
         self.assertEqual(response.status_code, 404)
 
     def test_1_get_customer(self):

@@ -53,8 +53,9 @@ def get_records_by_id(table, id):
 
     else:
         id_type = "booking_id"
-
-    rows = query_exec(f"select * from {table} where {id_type} = %s", (id,))
+        
+    query = f"select * from {table} where {id_type} = %s"
+    rows = query_exec(query, (id,))
     if not rows:
         return make_response(jsonify({"error": "No records found"}), 404)
     
