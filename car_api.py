@@ -224,6 +224,9 @@ def edit_records_by_id(table, id):
             update_fields.append("other_mechanic_details = %s")
             update_values.append(other_mechanic_details)
 
+        if not isinstance(first_name, str) or not isinstance(last_name, str) or not isinstance(contact_number, str):
+            return make_response(jsonify({"error": "Invalid input type"}), 400)
+
         update_values.append(id)
         id_type = "mechanic_id"
 

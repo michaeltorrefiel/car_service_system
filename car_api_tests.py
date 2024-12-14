@@ -465,11 +465,6 @@ class CarApiTests(unittest.TestCase):
         self.assertEqual(response.json["error"], "no fields provided")
         self.assertEqual(response.status_code, 400)
 
-        test_customer_dummy = {
-            "first_name": "FNAME_TEST",
-            "last_name": "LNAME_TEST",
-            "contact_number": "09000735700"
-        }
         response = self.app.put(f"/customers/99999999", json=test_customer_dummy)
         self.assertEqual(response.json["error"], "record not found")
         self.assertEqual(response.status_code, 404)
@@ -499,6 +494,49 @@ class CarApiTests(unittest.TestCase):
         self.assertEqual(response_data["rows_affected"], 1)
 
         self.app.delete(f"/customers/{customer_id}")
+
+    def test_put_mechanic_error(self):
+        test_mechanic_dummy = {
+            "first_name": "FNAME_TEST",
+            "last_name": "LNAME_TEST",
+            "contact_number": "09000735700"
+        } 
+        response = self.app.post("/mechanics", json=test_mechanic_dummy)
+        self.assertEqual(response.status_code, 201)
+        mechanic_id = response.get_json()["mechanic_id"]
+
+        test_mechanic_dummy_invalid = {
+            "first_name": 1,
+            "last_name": "LNAME_TEST",
+            "contact_number": "09000735700"
+        }
+        response = self.app.put(f"/invalid_table/{mechanic_id}", json=test_mechanic_dummy_invalid)
+        self.assertEqual(response.json["error"], "Table not found")
+        self.assertEqual(response.status_code, 404)
+
+        test_customer_dummy_no_update_fields = {}
+        response = self.app.put(f"/mechanics/{mechanic_id}", json=test_customer_dummy_no_update_fields)
+        self.assertEqual(response.json["error"], "Invalid JSON payload")
+        self.assertEqual(response.status_code, 400)
+ 
+        response = self.app.put(f"/mechanics/{mechanic_id}", json=test_mechanic_dummy_invalid)
+        self.assertEqual(response.json["error"], "Invalid input type")
+        self.assertEqual(response.status_code, 400)
+
+        test_mechanic_dummy_no_update_fields = {
+            "first_name": "",
+            "last_name": "",
+            "contact_number": ""
+        }
+        response = self.app.put(f"/mechanics/{mechanic_id}", json=test_mechanic_dummy_no_update_fields)
+        self.assertEqual(response.json["error"], "no fields provided")
+        self.assertEqual(response.status_code, 400)
+
+        response = self.app.put(f"/mechanics/99999999", json=test_mechanic_dummy)
+        self.assertEqual(response.json["error"], "record not found")
+        self.assertEqual(response.status_code, 404)
+
+        self.app.delete(f"/customers/{mechanic_id}")
 
     def test_put_mechanic(self):
         test_mechanic_dummy = {
