@@ -44,7 +44,7 @@ Environment variables needed:
  Make sure that app.py and car_api_tests.py are on the same directory
 
 ## Note
- local_app.py is the file I originally used for local testing
- car_api_tests.py tests the local_app.py
- app.py is the deployed app with a few changes in the code
+- `local_app.py` is the file I originally used for local testing.
+- `car_api_tests.py` tests the `local_app.py`.
+- `app.py` is the deployed app with a few changes in the code.
 
