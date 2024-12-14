@@ -42,4 +42,3 @@ Environment variables needed:
  Run "python car_api_tests.py"
 ```
  Make sure that app.py and car_api_tests.py are on the same directory
-```
