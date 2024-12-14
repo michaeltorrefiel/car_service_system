@@ -2,23 +2,17 @@ from flask import Flask, request, jsonify, make_response
 from flask_mysqldb import MySQL
 from datetime import datetime
 import jwt
-import os
 
 app = Flask(__name__)
 
-app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST')
-app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')
-app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')
-app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')
-
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'root'
+app.config['MYSQL_DB'] = 'car_service'
 app.config['SECRET_KEY'] = 'secret_key'
 app.config['MYSQL_CURSORCLASS'] = "DictCursor"
 
 mysql = MySQL(app)
-
-@app.route('/test_db')
-def test_db():
-    return f"Connected to DB: {app.config['MYSQL_DB']}"
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -57,9 +51,9 @@ def home_page():
     """
     return home
 
-def query_exec(query):
+def query_exec(query, params):
     cur = mysql.connection.cursor()
-    cur.execute(query)
+    cur.execute(query, params)
     rows = cur.fetchall()
     cur.close()
     return(rows)
@@ -70,10 +64,10 @@ def get_records(table):
     if table not in db_tables:
         return make_response(jsonify({"error": "Table not found"}), 404)
 
-    rows = query_exec(f"select * from {table}")
+    rows = query_exec("select * from %s", (table,))
     if not rows:
         return make_response(jsonify({"error": "No records found"}), 404)
-
+    
     return make_response(jsonify(rows), 200)
 
 @app.route("/<table>/<int:id>", methods=["GET"])
@@ -91,11 +85,11 @@ def get_records_by_id(table, id):
     else:
         id_type = "booking_id"
 
-    query = f"select * from {table} where {id_type} = {id}"
-    rows = query_exec(query)
+    query = f"select * from {table} where {id_type} = %s"
+    rows = query_exec(query, (id,))
     if not rows:
         return make_response(jsonify({"error": "No records found"}), 404)
-
+    
     return make_response(jsonify(rows), 200)
 
 @app.route("/cars/<plate_number>", methods=["GET"])
@@ -103,10 +97,10 @@ def get_car_records_by_id(plate_number):
     if len(plate_number) > 9:
         return make_response(jsonify({"error": "Invalid plate number"}), 400)
 
-    rows = query_exec(f"select * from cars where plate_number = {plate_number}")
+    rows = query_exec("select * from cars where plate_number = %s", (plate_number,))
     if not rows:
         return make_response(jsonify({"error": "No records found"}), 404)
-
+    
     return make_response(jsonify(rows), 200)
 
 @app.route("/<table>", methods=["POST"])
@@ -120,7 +114,7 @@ def add_records(table):
     info = request.get_json()
     if not info:
         return make_response(jsonify({"error": "Invalid JSON payload"}), 400)
-
+    
     if table == "customers":
         required_fields = ["first_name", "last_name", "contact_number"]
     elif table == "mechanics":
@@ -133,7 +127,7 @@ def add_records(table):
     missing_fields = [field for field in required_fields if field not in info]
     if missing_fields:
         return make_response(jsonify({"error": "Missing fields"}), 400)
-
+    
     if table == "customers":
         first_name = info["first_name"]
         last_name = info["last_name"]
@@ -142,7 +136,7 @@ def add_records(table):
         if not isinstance(first_name, str) or not isinstance(last_name, str) or not isinstance(contact_number, str):
             return make_response(jsonify({"error": "Invalid input type"}), 400)
 
-        cur.execute(f"insert into customers(first_name, last_name, contact_number) value {first_name}, {last_name}, {contact_number}")
+        cur.execute("insert into customers(first_name, last_name, contact_number) value (%s, %s, %s)", (first_name, last_name, contact_number))
         record_name = "customer"
         id_type = "customer_id"
         id = cur.lastrowid
@@ -157,7 +151,7 @@ def add_records(table):
         if not isinstance(first_name, str) or not isinstance(last_name, str) or not isinstance(contact_number, str):
             return make_response(jsonify({"error": "Invalid input type"}), 400)
 
-        cur.execute(f"insert into mechanics(first_name, last_name, contact_number, other_mechanic_details) value {first_name}, {last_name}, {contact_number}, {other_mechanic_details}")
+        cur.execute("insert into mechanics(first_name, last_name, contact_number, other_mechanic_details) value (%s, %s, %s, %s)", (first_name, last_name, contact_number, other_mechanic_details))
         record_name = "mechanic"
         id_type = "mechanic_id"
         id = cur.lastrowid
@@ -177,7 +171,7 @@ def add_records(table):
         if len(plate_number) > 9:
             return make_response(jsonify({"error": "Invalid plate number"}), 400)
 
-        cur.execute(f"insert into cars(plate_number, customer_id, manufacturer, model, known_issue, other_details) value {plate_number}, {customer_id}, {manufacturer}, {model}, {known_issue}, {other_details}")
+        cur.execute("insert into cars(plate_number, customer_id, manufacturer, model, known_issue, other_details) value (%s, %s, %s, %s, %s, %s)", (plate_number, customer_id, manufacturer, model, known_issue, other_details))
         record_name = "car"
         id_type = "plate_number"
         id = plate_number
@@ -197,7 +191,7 @@ def add_records(table):
         except ValueError:
             return make_response(jsonify({"error": "Invalid datetime format. Must be in yyyy-mm-dd hh:mm:ss"}), 400)
 
-        cur.execute(f"insert into bookings(mechanic_id, customer_id, plate_number, date_time_of_service, payment) value {mechanic_id}, {customer_id}, {plate_number}, {date_time_of_service}, {payment}")
+        cur.execute("insert into bookings(mechanic_id, customer_id, plate_number, date_time_of_service, payment) value (%s, %s, %s, %s, %s)", (mechanic_id, customer_id, plate_number, date_time_of_service, payment))
         record_name = "booking"
         id_type = "booking_id"
         id = cur.lastrowid
@@ -214,29 +208,34 @@ def edit_records_by_id(table, id):
     db_tables = ["customers", "mechanics", "bookings"]
     if table not in db_tables:
         return make_response(jsonify({"error": "Table not found"}), 404)
-
+    
     cur = mysql.connection.cursor()
-
+    
     info = request.get_json()
     if not info:
         return make_response(jsonify({"error": "Invalid JSON payload"}), 400)
-
+    
     update_fields = []
+    update_values = []
     if table == "customers":
         first_name = info.get("first_name")
         last_name = info.get("last_name")
         contact_number = info.get("contact_number")
 
         if first_name:
-            update_fields.append("first_name = {first_name}")
+            update_fields.append("first_name = %s")
+            update_values.append(first_name)
         if last_name:
-            update_fields.append("last_name = {last_name}")
+            update_fields.append("last_name = %s")
+            update_values.append(last_name)
         if contact_number:
-            update_fields.append("contact_number = {contact_number}")
+            update_fields.append("contact_number = %s")
+            update_values.append(contact_number)
 
         if not isinstance(first_name, str) or not isinstance(last_name, str) or not isinstance(contact_number, str):
             return make_response(jsonify({"error": "Invalid input type"}), 400)
 
+        update_values.append(id)
         id_type = "customer_id"
 
     elif table == "mechanics":
@@ -246,17 +245,22 @@ def edit_records_by_id(table, id):
         other_mechanic_details = info.get("other_mechanic_details")
 
         if first_name:
-            update_fields.append("first_name = {first_name}")
+            update_fields.append("first_name = %s")
+            update_values.append(first_name)
         if last_name:
-            update_fields.append("last_name = {last_name}")
+            update_fields.append("last_name = %s")
+            update_values.append(last_name)
         if contact_number:
-            update_fields.append("contact_number = {contact_number}")
+            update_fields.append("contact_number = %s")
+            update_values.append(contact_number)
         if other_mechanic_details:
-            update_fields.append("other_mechanic_details = {other_mechanic_details}")
+            update_fields.append("other_mechanic_details = %s")
+            update_values.append(other_mechanic_details)
 
         if not isinstance(first_name, str) or not isinstance(last_name, str) or not isinstance(contact_number, str):
             return make_response(jsonify({"error": "Invalid input type"}), 400)
 
+        update_values.append(id)
         id_type = "mechanic_id"
 
     else:
@@ -265,34 +269,40 @@ def edit_records_by_id(table, id):
         plate_number = info.get("plate_number")
         date_time_of_service = info.get("date_time_of_service")
         payment = info.get("payment")
-
+        
         if mechanic_id:
-            update_fields.append("mechanic_id = {mechanic_id}")
+            update_fields.append("mechanic_id = %s")
+            update_values.append(mechanic_id)
         if customer_id:
-            update_fields.append("customer_id = {customer_id}")
+            update_fields.append("customer_id = %s")
+            update_values.append(customer_id)
         if plate_number:
-            update_fields.append("plate_number = {plate_number}")
+            update_fields.append("plate_number = %s")
+            update_values.append(plate_number)
 
         if date_time_of_service:
             try:
                 datetime.strptime(date_time_of_service, "%Y-%m-%d %H:%M:%S")
             except ValueError:
                 return make_response(jsonify({"error": "Invalid datetime format. Must be in yyyy-mm-dd hh:mm:ss"}), 400)
-            update_fields.append("date_time_of_service = {date_time_of_service}")
+            update_fields.append("date_time_of_service = %s")
+            update_values.append(date_time_of_service)
 
         if payment:
-            update_fields.append("payment = {payment}")
+            update_fields.append("payment = %s")
+            update_values.append(payment)
 
         if not isinstance(mechanic_id, int) or not isinstance(customer_id, int) or not isinstance(plate_number, str) or not isinstance(payment, str):
             return make_response(jsonify({"error": "Invalid input type"}), 400)
 
+        update_values.append(id)
         id_type = "booking_id"
-
+    
     if not update_fields:
         return make_response(jsonify({"error": "no fields provided"}), 400)
-
-    cur.execute(f"update {table} set {', '.join(update_fields)} where {id_type} = {id}")
-
+    
+    cur.execute(f"update {table} set {', '.join(update_fields)} where {id_type} = %s", tuple(update_values))
+    
     mysql.connection.commit()
     rows_affected = cur.rowcount
     cur.close()
@@ -317,29 +327,36 @@ def edit_cars_records(plate_number):
     other_details = info.get("other_details")
 
     update_fields = []
+    update_values = []
 
     if customer_id:
-        update_fields.append("customer_id = {customer_id}")
+        update_fields.append("customer_id = %s")
+        update_values.append(customer_id)
     if manufacturer:
-        update_fields.append("manufacturer = {manufacturer}")
+        update_fields.append("manufacturer = %s")
+        update_values.append(manufacturer)
     if model:
-        update_fields.append("model = {model}")
+        update_fields.append("model = %s")
+        update_values.append(model)
     if known_issue:
-        update_fields.append("known_issue = {known_issue}")
+        update_fields.append("known_issue = %s")
+        update_values.append(known_issue)
     if other_details:
-        update_fields.append("other_details = {other_details}")
+        update_fields.append("other_details = %s")
+        update_values.append(other_details)
 
     if not update_fields:
         return make_response(jsonify({"error": "no fields provided"}), 400)
-
+    
     if not isinstance(plate_number, str) or not isinstance(customer_id, int) or not isinstance(manufacturer, str) or not isinstance(model, str):
         return make_response(jsonify({"error": "Invalid input type"}), 400)
 
     if len(plate_number) > 9:
         return make_response(jsonify({"error": "Invalid plate number"}), 400)
 
+    update_values.append(plate_number)
 
-    cur.execute(f"update cars set {', '.join(update_fields)} where plate_number = {plate_number}")
+    cur.execute(f"update cars set {', '.join(update_fields)} where plate_number = %s", tuple(update_values))
 
     mysql.connection.commit()
     rows_affected = cur.rowcount
@@ -355,20 +372,20 @@ def delete_records_by_id(table, id):
     db_tables = ["customers", "mechanics", "bookings"]
     if table not in db_tables:
         return make_response(jsonify({"error": "Table not found"}), 404)
-
+    
     cur = mysql.connection.cursor()
-
+    
     if table == "customers":
         id_type = "customer_id"
-
+        
     elif table == "mechanics":
         id_type = "mechanic_id"
 
     else:
         id_type = "booking_id"
 
-    query = f"delete from {table} where {id_type} = {id}"
-    cur.execute(query)
+    query = f"delete from {table} where {id_type} = %s"
+    cur.execute(query, (id,))
 
     mysql.connection.commit()
     rows_affected = cur.rowcount
@@ -383,8 +400,8 @@ def delete_records_by_id(table, id):
 def delete_car_records(plate_number):
     cur = mysql.connection.cursor()
 
-    cur.execute(f"delete from cars where plate_number = {plate_number}")
-
+    cur.execute("delete from cars where plate_number = %s", (plate_number,))
+    
     mysql.connection.commit()
     rows_affected = cur.rowcount
     cur.close()
@@ -396,38 +413,38 @@ def delete_car_records(plate_number):
 
 @app.route("/mechanics/schedule/<int:id>", methods=["GET"])
 def get_mechanic_bookings(id):
-    query = f"""
-    select concat(m.first_name, " ", m.last_name) full_name, b.date_time_of_service sched from mechanics m left join bookings b on m.mechanic_id = b.mechanic_id where m.mechanic_id = {id};
+    query = """
+    select concat(m.first_name, " ", m.last_name) full_name, b.date_time_of_service sched from mechanics m left join bookings b on m.mechanic_id = b.mechanic_id where m.mechanic_id = %s;
     """
-    rows = query_exec(query)
+    rows = query_exec(query, (id,))
 
     if not rows:
         return make_response(jsonify({"error": "No records found"}), 404)
-
-    return make_response(jsonify(rows), 200)
+    
+    return make_response(jsonify(rows), 200)  
 
 @app.route("/cars/details/<plate_number>", methods=["GET"])
 def get_car_details(plate_number):
-    query = f"select plate_number, manufacturer, model from cars where plate_number = {plate_number}"
+    query = "select plate_number, manufacturer, model from cars where plate_number = %s"
 
-    rows = query_exec(query)
+    rows = query_exec(query, (plate_number,))
 
     if not rows:
         return make_response(jsonify({"error": "No records found"}), 404)
-
+    
     return make_response(jsonify(rows), 200)
 
 @app.route("/customers/bills/<int:id>", methods=["GET"])
 def get_customer_bills(id):
-    query = f"""
-    select concat(c.first_name, " ", c.last_name) full_name, b.plate_number, b.payment from customers c left join bookings b on c.customer_id = b.customer_id where c.customer_id = {id};
+    query = """
+    select concat(c.first_name, " ", c.last_name) full_name, b.plate_number, b.payment from customers c left join bookings b on c.customer_id = b.customer_id where c.customer_id = %s; 
     """
-    rows = query_exec(query)
+    rows = query_exec(query, (id,))
 
     if not rows:
         return make_response(jsonify({"error": "No records found"}), 404)
-
-    return make_response(jsonify(rows), 200)
+    
+    return make_response(jsonify(rows), 200)  
 
 if __name__ == "__main__":
     app.run(debug=True)
