@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, make_response
 from flask_mysqldb import MySQL
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -148,6 +149,15 @@ def add_records(table):
         plate_number = info["plate_number"]
         date_time_of_service = info["date_time_of_service"]
         payment = info["payment"]
+
+        if not isinstance(mechanic_id, int) or not isinstance(customer_id, int) or not isinstance(plate_number, str) or not isinstance(payment, str):
+            return make_response(jsonify({"error": "Invalid input type"}), 400)
+
+        try:
+            datetime.strptime(date_time_of_service, "%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            return make_response(jsonify({"error": "Invalid datetime format. Must be in yyyy-mm-dd hh:mm:ss"}), 400)
+
         cur.execute("insert into bookings(mechanic_id, customer_id, plate_number, date_time_of_service, payment) value (%s, %s, %s, %s, %s)", (mechanic_id, customer_id, plate_number, date_time_of_service, payment))
         record_name = "booking"
         id_type = "booking_id"
