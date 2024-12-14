@@ -361,7 +361,10 @@ def delete_records_by_id(table, id):
     rows_affected = cur.rowcount
     cur.close()
 
-    return make_response(jsonify({"message": "record deleted successfully", "rows_affected": rows_affected}), 200)
+    if rows_affected > 0:
+        return make_response(jsonify({"message": "record deleted successfully", "rows_affected": rows_affected}), 200)
+    else:
+        return make_response(jsonify({"error": "record not found"}), 404)
 
 @app.route("/cars/<plate_number>", methods = ["DELETE"])
 def delete_car_records(plate_number):
@@ -373,7 +376,10 @@ def delete_car_records(plate_number):
     rows_affected = cur.rowcount
     cur.close()
 
-    return make_response(jsonify({"message": "record deleted successfully", "rows_affected": rows_affected}), 200)
+    if rows_affected > 0:
+        return make_response(jsonify({"message": "record deleted successfully", "rows_affected": rows_affected}), 200)
+    else:
+        return make_response(jsonify({"error": "record not found"}), 404)
 
 if __name__ == "__main__":
     app.run(debug=True)

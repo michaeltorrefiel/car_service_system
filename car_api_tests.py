@@ -809,6 +809,23 @@ class CarApiTests(unittest.TestCase):
         self.app.delete(f"/mechanics/{mechanic_id}")
         self.app.delete(f"/customers/{customer_id}")
 
+    def test_delete_record_error(self):
+        response = self.app.delete("/bookings/99999999")
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("record not found", response.get_json()["error"])
+        
+        response = self.app.delete("/cars/ZZZZ99999")
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("record not found", response.get_json()["error"])
+
+        response = self.app.delete("/customers/99999999")
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("record not found", response.get_json()["error"])
+        
+        response = self.app.delete("/mechanics/99999999")
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("record not found", response.get_json()["error"])
+
     def test_2_delete_record(self):
         # delete test for bookings
         response = self.app.delete(f"/bookings/{self.booking_id}")
