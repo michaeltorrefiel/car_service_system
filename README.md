@@ -11,7 +11,10 @@ pip install -r requirements.txt
 Environment variables needed:
 
 FLASK_APP: app.py
-DATABASE_URL
+DATABASE_URL: michaeltorrefiel.mysql.pythonanywhere-services.com
+USER: michaeltorrefiel
+PASSWORD: root1234
+DATABASE: michaeltorrefiel$car_service
 SECRET_KEY: secret_key
 
 ## API Endpoints (markdown table)
@@ -19,7 +22,7 @@ Endpoint			Method		Description
 =====================================
 /login				POST		Get token
 /protected			GET		Verify token
-/					Home page
+/						Home page
 /<table>			GET		Get records for <table>
 /<table>/<int:id>		GET		Get a specific record
 /cars/<plate_number>		GET		Get a specific car record
@@ -33,5 +36,5 @@ Endpoint			Method		Description
 /customers/bills/<int:id>	GET		List customer bills
 
 ## Testing
- run "python car_api_tests.py"
+ Run "python car_api_tests.py"
  Make sure that app.py and car_api_tests.py are on the same directory
