@@ -59,6 +59,10 @@ class CarApiTests(unittest.TestCase):
         self.app.delete(f"/customers/{self.customer_id}")
         self.app.delete(f"/mechanics/{self.mechanic_id}")
 
+    def test_if_table_not_found(self):
+        response = self.app.get(f"/motorcyles")
+        self.assertEqual(response.status_code, 404)
+
     def test_1_get_customer(self):
         response = self.app.get(f"/customers/{self.customer_id}")
         self.assertEqual(response.status_code, 200)
