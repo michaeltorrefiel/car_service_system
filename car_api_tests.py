@@ -185,10 +185,10 @@ class CarApiTests(unittest.TestCase):
         self.assertEqual(response.json["error"], "Table not found")
         self.assertEqual(response.status_code, 404)
 
-        response = self.app.post("/customers", content_type="application/json")
+        response = self.app.post("/mechanics", content_type="application/json")
         self.assertEqual(response.status_code, 400)
 
-        response = self.app.post("/customers", json=test_mechanic_dummy_missing)
+        response = self.app.post("/mechanics", json=test_mechanic_dummy_missing)
         self.assertEqual(response.json["error"], "Missing fields")
         self.assertEqual(response.status_code, 400)
 
@@ -197,7 +197,7 @@ class CarApiTests(unittest.TestCase):
             "last_name": "LNAME_TEST",
             "contact_number": "09000735700"
         }
-        response = self.app.post("/customers", json=test_mechanic_dummy_invalid)
+        response = self.app.post("/mechanics", json=test_mechanic_dummy_invalid)
         self.assertEqual(response.json["error"], "Invalid input type")
         self.assertEqual(response.status_code, 400)
 
@@ -220,6 +220,48 @@ class CarApiTests(unittest.TestCase):
 
         mechanic_id = response_data["mechanic_id"]
         self.app.delete(f"/mechanics/{mechanic_id}")
+
+    def test_post_car_error(self):
+        test_customer_dummy = {
+            "first_name": "FNAME_TEST",
+            "last_name": "LNAME_TEST",
+            "contact_number": "09000735700"
+        } 
+        response = self.app.post("/customers", json=test_customer_dummy)
+        self.assertEqual(response.status_code, 201)
+        customer_id = response.get_json()["customer_id"]
+
+        test_car_dummy_missing = {
+            "plate_number": "PLT_TEST1",
+            "customer_id": customer_id,
+            "model": "MOD_TEST",
+            "known_issue": "KNOWN_ISS_TEST",
+            "other_details": "CAR_DEETS_TEST",
+        }
+        response = self.app.post("/invalid_table", json=test_car_dummy_missing)
+        self.assertEqual(response.json["error"], "Table not found")
+        self.assertEqual(response.status_code, 404)
+
+        response = self.app.post("/cars", content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+
+        response = self.app.post("/cars", json=test_car_dummy_missing)
+        self.assertEqual(response.json["error"], "Missing fields")
+        self.assertEqual(response.status_code, 400)
+
+        test_car_dummy_invalid = {
+            "plate_number": 1,
+            "customer_id": customer_id,
+            "manufacturer": "MAN_TEST",
+            "model": "MOD_TEST",
+            "known_issue": "KNOWN_ISS_TEST",
+            "other_details": "CAR_DEETS_TEST",
+        }
+        response = self.app.post("/cars", json=test_car_dummy_invalid)
+        self.assertEqual(response.json["error"], "Invalid input type")
+        self.assertEqual(response.status_code, 400)
+        
+        self.app.delete(f"/customers/{customer_id}")
 
     def test_post_car(self):
         test_customer_dummy = {

@@ -133,6 +133,10 @@ def add_records(table):
         model = info["model"]
         known_issue = info.get("known_issue", "")
         other_details = info.get("other_details", "")
+
+        if not isinstance(plate_number, str) or not isinstance(customer_id, int) or not isinstance(manufacturer, str) or not isinstance(model, str):
+            return make_response(jsonify({"error": "Invalid input type"}), 400)
+
         cur.execute("insert into cars(plate_number, customer_id, manufacturer, model, known_issue, other_details) value (%s, %s, %s, %s, %s, %s)", (plate_number, customer_id, manufacturer, model, known_issue, other_details))
         record_name = "car"
         id_type = "plate_number"
