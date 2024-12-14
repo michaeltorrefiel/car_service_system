@@ -407,7 +407,7 @@ class CarApiTests(unittest.TestCase):
         mechanic_id = response.get_json()["mechanic_id"]
 
         test_car_dummy = {
-            "plate_number": "PLT_TEST2",
+            "plate_number": "PLT_TEST3",
             "customer_id": customer_id,
             "manufacturer": "MAN_TEST",
             "model": "MOD_TEST",
@@ -576,7 +576,7 @@ class CarApiTests(unittest.TestCase):
 
         self.app.delete(f"/mechanics/{mechanic_id}")
 
-    def test_put_car_error(self):
+    def test_put_car_error(self):#############################
         test_customer_dummy = {
             "first_name": "FNAME_TEST",
             "last_name": "LNAME_TEST",
@@ -587,7 +587,7 @@ class CarApiTests(unittest.TestCase):
         customer_id = response.get_json()["customer_id"]
 
         test_car_dummy = {
-            "plate_number": "PLT_TEST3",
+            "plate_number": "PLT_TEST4",
             "customer_id": customer_id,
             "manufacturer": "MAN_TEST",
             "model": "MOD_TEST",
@@ -599,7 +599,7 @@ class CarApiTests(unittest.TestCase):
         plate_number = test_car_dummy["plate_number"]
 
         test_car_dummy_invalid = {
-            "plate_number": "PLT_TEST3",
+            "plate_number": "PLT_TEST4",
             "customer_id": customer_id,
             "manufacturer": 1,
             "model": "MOD_TEST",
@@ -648,7 +648,7 @@ class CarApiTests(unittest.TestCase):
         customer_id = response.get_json()["customer_id"]
 
         test_car_dummy = {
-            "plate_number": "PLT_TEST4",
+            "plate_number": "PLT_TEST5",
             "customer_id": customer_id,
             "manufacturer": "MAN_TEST",
             "model": "MOD_TEST",
@@ -677,7 +677,7 @@ class CarApiTests(unittest.TestCase):
         self.app.delete(f"/cars/{plate_number}")
         self.app.delete(f"/customers/{customer_id}")
 
-    def test_put_booking(self):
+    def test_put_booking_error(self):###################
         test_customer_dummy = {
             "first_name": "FNAME_TEST",
             "last_name": "LNAME_TEST",
@@ -707,6 +707,76 @@ class CarApiTests(unittest.TestCase):
         }
         response = self.app.post("/cars", json=test_car_dummy)
         self.assertEqual(response.status_code, 201)
+        plate_number = response.get_json()["plate_number"]
+
+        test_booking_dummy = {
+            "mechanic_id": mechanic_id,
+            "customer_id": customer_id,
+            "plate_number": plate_number,
+            "date_time_of_service": "2024-12-12 12:12:12",
+            "payment": "2024"
+        }
+        response = self.app.post("/bookings", json=test_booking_dummy)
+        self.assertEqual(response.status_code, 201)
+        booking_id = response.get_json()["booking_id"]
+
+        test_booking_dummy_invalid = {
+            "mechanic_id": mechanic_id,
+            "customer_id": customer_id,
+            "plate_number": plate_number,
+            "date_time_of_service": "2024-12-12 12:12:12",
+            "payment": 2024
+        }
+        response = self.app.put(f"/bookings/{booking_id}", json=test_booking_dummy_invalid)
+        self.assertEqual(response.json["error"], "Invalid input type")
+        self.assertEqual(response.status_code, 400)
+
+        response = self.app.put(f"/cars/{booking_id}", json={})
+        self.assertEqual(response.json["error"], "Invalid JSON payload")
+        self.assertEqual(response.status_code, 400)
+
+        test_booking_dummy_invalid_time = {
+            "date_time_of_service": "Thu, 12 Dec 2024 08:00:00 GMT"
+        }
+        response = self.app.put(f"/bookings/{booking_id}", json=test_booking_dummy_invalid_time)
+        self.assertEqual(response.json["error"], "Invalid datetime format. Must be in yyyy-mm-dd hh:mm:ss")
+        self.assertEqual(response.status_code, 400)
+
+        self.app.delete(f"/bookings/{booking_id}")
+        self.app.delete(f"/cars/{plate_number}")
+        self.app.delete(f"/customers/{customer_id}")
+        self.app.delete(f"/mechanics/{mechanic_id}")
+
+    def test_put_booking(self):
+        test_customer_dummy = {
+            "first_name": "FNAME_TEST",
+            "last_name": "LNAME_TEST",
+            "contact_number": "09000735700"
+        } 
+        response = self.app.post("/customers", json=test_customer_dummy)
+        self.assertEqual(response.status_code, 201)
+        customer_id = response.get_json()["customer_id"]
+
+        test_mechanic_dummy = {
+            "first_name": "FNAME_TEST",
+            "last_name": "LNAME_TEST",
+            "contact_number": "09000735700",
+            "other_mechanic_details": "MECHANIC_DEETS_TEST"
+        } 
+        response = self.app.post("/mechanics", json=test_mechanic_dummy)
+        self.assertEqual(response.status_code, 201)
+        mechanic_id = response.get_json()["mechanic_id"]
+
+        test_car_dummy = {
+            "plate_number": "PLT_TEST6",
+            "customer_id": customer_id,
+            "manufacturer": "MAN_TEST",
+            "model": "MOD_TEST",
+            "known_issue": "KNOWN_ISS_TEST",
+            "other_details": "CAR_DEETS_TEST",
+        }
+        response = self.app.post("/cars", json=test_car_dummy)
+        self.assertEqual(response.status_code, 201)
         plate_number = test_car_dummy["plate_number"]
 
         test_booking_dummy = {
@@ -721,6 +791,9 @@ class CarApiTests(unittest.TestCase):
         booking_id = response.get_json()["booking_id"]
 
         updated_booking_data = {
+            "mechanic_id": mechanic_id,
+            "customer_id": customer_id,
+            "plate_number": plate_number,
             "date_time_of_service": "2025-12-12 12:12:12",
             "payment": "2025"
         }
@@ -733,7 +806,7 @@ class CarApiTests(unittest.TestCase):
 
         self.app.delete(f"/bookings/{booking_id}")
         self.app.delete(f"/cars/{plate_number}")
-        self.app.delete(f"/mechanics/{plate_number}")
+        self.app.delete(f"/mechanics/{mechanic_id}")
         self.app.delete(f"/customers/{customer_id}")
 
     def test_2_delete_record(self):

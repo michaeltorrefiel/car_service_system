@@ -249,12 +249,21 @@ def edit_records_by_id(table, id):
         if plate_number:
             update_fields.append("plate_number = %s")
             update_values.append(plate_number)
+
         if date_time_of_service:
+            try:
+                datetime.strptime(date_time_of_service, "%Y-%m-%d %H:%M:%S")
+            except ValueError:
+                return make_response(jsonify({"error": "Invalid datetime format. Must be in yyyy-mm-dd hh:mm:ss"}), 400)
             update_fields.append("date_time_of_service = %s")
             update_values.append(date_time_of_service)
+
         if payment:
             update_fields.append("payment = %s")
             update_values.append(payment)
+
+        if not isinstance(mechanic_id, int) or not isinstance(customer_id, int) or not isinstance(plate_number, str) or not isinstance(payment, str):
+            return make_response(jsonify({"error": "Invalid input type"}), 400)
 
         update_values.append(id)
         id_type = "booking_id"
