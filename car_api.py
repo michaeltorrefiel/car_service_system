@@ -179,6 +179,9 @@ def edit_records_by_id(table, id):
     cur = mysql.connection.cursor()
     
     info = request.get_json()
+    if not info:
+        return make_response(jsonify({"error": "Invalid JSON payload"}), 400)
+    
     update_fields = []
     update_values = []
     if table == "customers":
@@ -195,6 +198,9 @@ def edit_records_by_id(table, id):
         if contact_number:
             update_fields.append("contact_number = %s")
             update_values.append(contact_number)
+
+        if not isinstance(first_name, str) or not isinstance(last_name, str) or not isinstance(contact_number, str):
+            return make_response(jsonify({"error": "Invalid input type"}), 400)
 
         update_values.append(id)
         id_type = "customer_id"
@@ -248,7 +254,7 @@ def edit_records_by_id(table, id):
         id_type = "booking_id"
     
     if not update_fields:
-        return make_response(jsonify({"message": "no fields provided"}), 400)
+        return make_response(jsonify({"error": "no fields provided"}), 400)
     
     cur.execute(f"update {table} set {', '.join(update_fields)} where {id_type} = %s", tuple(update_values))
     
@@ -259,7 +265,7 @@ def edit_records_by_id(table, id):
     if rows_affected > 0:
         return make_response(jsonify({"message": "record updated successfully", "rows_affected": rows_affected}), 200)
     else:
-        return make_response(jsonify({"message": "record not found"}), 404)
+        return make_response(jsonify({"error": "record not found"}), 404)
 
 @app.route("/cars/<plate_number>", methods=["PUT"])
 def edit_cars_records(plate_number):
