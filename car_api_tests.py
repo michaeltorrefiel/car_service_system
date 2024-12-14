@@ -548,7 +548,7 @@ class CarApiTests(unittest.TestCase):
         self.assertEqual(response.json["error"], "record not found")
         self.assertEqual(response.status_code, 404)
 
-        self.app.delete(f"/customers/{mechanic_id}")
+        self.app.delete(f"/mechanics/{mechanic_id}")
 
     def test_put_mechanic(self):
         test_mechanic_dummy = {
@@ -870,6 +870,32 @@ class CarApiTests(unittest.TestCase):
         normalized_response = " ".join(response.data.decode().split())
         normalized_home = " ".join(home.split())
         self.assertEqual(normalized_response, normalized_home)
+
+    def test_get_mechanic_bookings(self):
+        response = self.app.get(f"/mechanics/schedule/{self.mechanic_id}")
+        self.assertEqual(response.get_json()[0]["full_name"], "FNAME_TEST LNAME_TEST")
+        self.assertEqual(response.status_code, 200)
+
+        response = self.app.get("/mechanics/schedule/99999999")
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_car_details(self):
+        response = self.app.get(f"/cars/details/{self.plate_number}")
+        self.assertEqual(response.get_json()[0]["manufacturer"], "MAN_TEST")
+        self.assertEqual(response.get_json()[0]["model"], "MOD_TEST")
+        self.assertEqual(response.get_json()[0]["plate_number"], "PLT_TEST")
+        self.assertEqual(response.status_code, 200)
+
+        response = self.app.get("/cars/details/ZZZZ99999")
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_customer_bills(self):
+        response = self.app.get(f"/customers/bills/{self.customer_id}")
+        self.assertEqual(response.get_json()[0]["full_name"], "FNAME_TEST LNAME_TEST")
+        self.assertEqual(response.status_code, 200)
+
+        response = self.app.get("/customers/bills/99999999")
+        self.assertEqual(response.status_code, 404)
 
 if __name__ == "__main__":
     unittest.main()

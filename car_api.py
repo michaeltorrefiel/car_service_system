@@ -381,5 +381,40 @@ def delete_car_records(plate_number):
     else:
         return make_response(jsonify({"error": "record not found"}), 404)
 
+@app.route("/mechanics/schedule/<int:id>", methods=["GET"])
+def get_mechanic_bookings(id):
+    query = """
+    select concat(m.first_name, " ", m.last_name) full_name, b.date_time_of_service sched from mechanics m left join bookings b on m.mechanic_id = b.mechanic_id where m.mechanic_id = %s;
+    """
+    rows = query_exec(query, (id,))
+
+    if not rows:
+        return make_response(jsonify({"error": "No records found"}), 404)
+    
+    return make_response(jsonify(rows), 200)  
+
+@app.route("/cars/details/<plate_number>")
+def get_car_details(plate_number):
+    query = "select plate_number, manufacturer, model from cars where plate_number = %s"
+
+    rows = query_exec(query, (plate_number,))
+
+    if not rows:
+        return make_response(jsonify({"error": "No records found"}), 404)
+    
+    return make_response(jsonify(rows), 200)
+
+@app.route("/customers/bills/<int:id>", methods=["GET"])
+def get_customer_bills(id):
+    query = """
+    select concat(c.first_name, " ", c.last_name) full_name, b.plate_number, b.payment from customers c left join bookings b on c.customer_id = b.customer_id where c.customer_id = %s; 
+    """
+    rows = query_exec(query, (id,))
+
+    if not rows:
+        return make_response(jsonify({"error": "No records found"}), 404)
+    
+    return make_response(jsonify(rows), 200)  
+
 if __name__ == "__main__":
     app.run(debug=True)
