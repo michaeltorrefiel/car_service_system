@@ -62,11 +62,7 @@ def get_records_by_id(table, id):
 
 @app.route("/cars/<plate_number>", methods=["GET"])
 def get_car_records_by_id(plate_number):
-    cur = mysql.connection.cursor()
-
-    cur.execute("select * from cars where plate_number = %s", (plate_number,))
-    rows = cur.fetchall()
-    cur.close()
+    rows = query_exec("select * from cars where plate_number = %s", (plate_number,))
     if not rows:
         return make_response(jsonify({"error": "No records found"}), 404)
     
