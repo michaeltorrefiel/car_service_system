@@ -81,10 +81,30 @@ def add_records(table):
         return make_response(jsonify({"error": "Table not found"}), 404)
 
     info = request.get_json()
+    if not info:
+        return make_response(jsonify({"error": "Invalid JSON payload"}), 400)
+    
+    if table == "customers":
+        required_fields = ["first_name", "last_name", "contact_number"]
+    elif table == "mechanics":
+        required_fields = ["first_name", "last_name", "contact_number"]
+    elif table == "cars":
+        required_fields = ["plate_number", "customer_id", "manufacturer", "model"]
+    else:
+        required_fields = ["mechanic_id", "customer_id", "plate_number", "date_time_of_service", "payment"]
+
+    missing_fields = [field for field in required_fields if field not in info]
+    if missing_fields:
+        return make_response(jsonify({"error": "Missing fields"}), 400)
+    
     if table == "customers":
         first_name = info["first_name"]
         last_name = info["last_name"]
         contact_number = info["contact_number"]
+
+        if not isinstance(first_name, str) or not isinstance(last_name, str) or not isinstance(contact_number, str):
+            return make_response(jsonify({"error": "Invalid input type"}), 400)
+
         cur.execute("insert into customers(first_name, last_name, contact_number) value (%s, %s, %s)", (first_name, last_name, contact_number))
         record_name = "customer"
         id_type = "customer_id"
@@ -96,6 +116,10 @@ def add_records(table):
         last_name = info["last_name"]
         contact_number = info["contact_number"]
         other_mechanic_details = info.get("other_mechanic_details", "")
+
+        if not isinstance(first_name, str) or not isinstance(last_name, str) or not isinstance(contact_number, str):
+            return make_response(jsonify({"error": "Invalid input type"}), 400)
+
         cur.execute("insert into mechanics(first_name, last_name, contact_number, other_mechanic_details) value (%s, %s, %s, %s)", (first_name, last_name, contact_number, other_mechanic_details))
         record_name = "mechanic"
         id_type = "mechanic_id"
@@ -124,6 +148,7 @@ def add_records(table):
         record_name = "booking"
         id_type = "booking_id"
         id = cur.lastrowid
+
 
     mysql.connection.commit()
     rows_affected = cur.rowcount
