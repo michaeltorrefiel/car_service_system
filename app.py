@@ -39,7 +39,7 @@ def protected():
 
     try:
         decoded = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])
-        return jsonify({"message": f"Welcome, {decoded["username"]}!"})
+        return jsonify({"message": f"Welcome, {decoded['username']}!"})
     except jwt.InvalidTokenError:
         return jsonify({"message": "Invalid token!"}), 403
 
@@ -64,7 +64,7 @@ def get_records(table):
     if table not in db_tables:
         return make_response(jsonify({"error": "Table not found"}), 404)
 
-    rows = query_exec(f"select * from %s", (table,))
+    rows = query_exec("select * from %s", (table,))
     if not rows:
         return make_response(jsonify({"error": "No records found"}), 404)
     
@@ -423,7 +423,7 @@ def get_mechanic_bookings(id):
     
     return make_response(jsonify(rows), 200)  
 
-@app.route("/cars/details/<plate_number>")
+@app.route("/cars/details/<plate_number>", methods=["GET"])
 def get_car_details(plate_number):
     query = "select plate_number, manufacturer, model from cars where plate_number = %s"
 

@@ -1,5 +1,5 @@
 import unittest 
-from car_api import app
+from app import app
 from datetime import datetime
 
 class CarApiTests(unittest.TestCase):
