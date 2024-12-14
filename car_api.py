@@ -53,7 +53,7 @@ def get_records_by_id(table, id):
 
     else:
         id_type = "booking_id"
-        
+
     query = f"select * from {table} where {id_type} = %s"
     rows = query_exec(query, (id,))
     if not rows:
@@ -63,6 +63,9 @@ def get_records_by_id(table, id):
 
 @app.route("/cars/<plate_number>", methods=["GET"])
 def get_car_records_by_id(plate_number):
+    if len(plate_number) > 9:
+        return make_response(jsonify({"error": "Invalid plate number"}), 400)
+
     rows = query_exec("select * from cars where plate_number = %s", (plate_number,))
     if not rows:
         return make_response(jsonify({"error": "No records found"}), 404)

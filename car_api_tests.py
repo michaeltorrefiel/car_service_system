@@ -73,6 +73,15 @@ class CarApiTests(unittest.TestCase):
         self.assertEqual(response.json["error"], "No records found")
         self.assertEqual(response.status_code, 404)
 
+    def test_get_car_error(self):
+        response = self.app.get("/cars/inv_plate_") # len("plate_num_") == 10
+        self.assertEqual(response.json["error"], "Invalid plate number")
+        self.assertEqual(response.status_code, 400)
+
+        response = self.app.get("/cars/ZZZZ99999")
+        self.assertEqual(response.json["error"], "No records found")
+        self.assertEqual(response.status_code, 404)
+
     def test_1_get_customer(self):
         response = self.app.get(f"/customers/{self.customer_id}")
         self.assertEqual(response.status_code, 200)
